@@ -106,19 +106,21 @@ public class LaterServiceImpl extends ServiceImpl<LaterMapper, Later> implements
             dynamicIds.add(later.getDynamicId());
         }
 
-        LambdaQueryWrapper<Play> playLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        playLambdaQueryWrapper.eq(Play::getUserId, userId);
-        playLambdaQueryWrapper.in(Play::getDynamicId, dynamicIds);
-        List<Play> playList = playMapper.selectList(playLambdaQueryWrapper);
+        if (!dynamicIds.isEmpty()) {
+            LambdaQueryWrapper<Play> playLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            playLambdaQueryWrapper.eq(Play::getUserId, userId);
+            playLambdaQueryWrapper.in(Play::getDynamicId, dynamicIds);
+            List<Play> playList = playMapper.selectList(playLambdaQueryWrapper);
 
-        dynamicIds = new ArrayList<>();
-        for (Play play : playList) {
-            dynamicIds.add(play.getDynamicId());
+            dynamicIds = new ArrayList<>();
+            for (Play play : playList) {
+                dynamicIds.add(play.getDynamicId());
+            }
+            if (!dynamicIds.isEmpty()) {
+                queryWrapper.in(Later::getDynamicId, dynamicIds);
+                this.remove(queryWrapper);
+            }
         }
-
-        queryWrapper.in(Later::getDynamicId, dynamicIds);
-        this.remove(queryWrapper);
-
     }
 
 
