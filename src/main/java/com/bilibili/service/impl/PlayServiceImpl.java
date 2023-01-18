@@ -49,6 +49,7 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
         LambdaQueryWrapper<Play> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.orderByDesc(Play::getId);
         queryWrapper.eq(Play::getUserId, UserThreadLocal.get());
+        queryWrapper.eq(Play::getIsDelete, NOT_DELETE);
         if (playId != null) {
             queryWrapper.lt(Play::getId, playId);
         }
