@@ -68,4 +68,9 @@ public class SubscribeController {
         subscribeService.unsubscribe(id);
         return "";
     }
+
+    @GetMapping("/getYesterdayData")
+    public SubscribeVO getYesterdayData() {
+        return subscribeService.getYesterdayData();
+    }
 }

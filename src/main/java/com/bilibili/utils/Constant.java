@@ -42,4 +42,7 @@ public class Constant {
     public static Integer NOT_PUBLIC_FAVORITES = 0;
     public static Integer PUBLIC_FAVORITES = 1;
 
+    public static Integer DELETE = 1;
+    public static Integer NOT_DELETE = 0;
+
 }

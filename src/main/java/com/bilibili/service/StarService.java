@@ -43,4 +43,11 @@ public interface StarService extends IService<Star> {
      * @return 谁点赞了我
      */
     List<StarVO> getStar(StarDTO starDTO);
+
+    /**
+     * 获取昨日新增点赞数
+     * @param type 动态类型
+     * @return 昨日新增点赞数
+     */
+    StarVO getYesterdayData(Integer type);
 }

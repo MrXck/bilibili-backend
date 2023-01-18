@@ -1,12 +1,17 @@
 package com.bilibili.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bilibili.dto.DynamicCommentDTO;
 import com.bilibili.exception.APIException;
 import com.bilibili.mapper.DynamicCommentMapper;
+import com.bilibili.mapper.DynamicMapper;
 import com.bilibili.mapper.UserMapper;
+import com.bilibili.pojo.Dynamic;
 import com.bilibili.pojo.DynamicComment;
 import com.bilibili.pojo.User;
 import com.bilibili.service.DynamicCommentService;
@@ -21,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.bilibili.utils.Constant.VIDEO_TYPE;
+
 /**
  * @author xck
  */
@@ -28,9 +35,11 @@ import java.util.stream.Collectors;
 public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper, DynamicComment> implements DynamicCommentService {
 
     private final UserMapper userMapper;
+    private final DynamicMapper dynamicMapper;
 
-    public DynamicCommentServiceImpl(UserMapper userMapper) {
+    public DynamicCommentServiceImpl(UserMapper userMapper, DynamicMapper dynamicMapper) {
         this.userMapper = userMapper;
+        this.dynamicMapper = dynamicMapper;
     }
 
     @Override
@@ -177,6 +186,37 @@ public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper,
         commentLambdaQueryWrapper.eq(DynamicComment::getDynamicId, id);
 
         dynamicCommentVO.setCommentNum(this.count(commentLambdaQueryWrapper));
+        return dynamicCommentVO;
+    }
+
+    @Override
+    public DynamicCommentVO getYesterdayData(Integer type) {
+        DynamicCommentVO dynamicCommentVO = new DynamicCommentVO();
+        dynamicCommentVO.setCommentNum(0);
+        DateTime yesterdayDateTime = DateUtil.yesterday();
+        String yesterday = yesterdayDateTime.toDateStr();
+        String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
+
+
+        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
+        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
+        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
+
+        List<Long> dynamicIds = new ArrayList<>();
+
+        for (Dynamic dynamic : dynamicList) {
+            dynamicIds.add(dynamic.getId());
+        }
+
+        if (!dynamicIds.isEmpty()) {
+            LambdaQueryWrapper<DynamicComment> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.ge(DynamicComment::getCreateTime, yesterday);
+            queryWrapper.lt(DynamicComment::getCreateTime, today);
+            queryWrapper.in(DynamicComment::getDynamicId, dynamicIds);
+
+            dynamicCommentVO.setCommentNum(this.count(queryWrapper));
+        }
         return dynamicCommentVO;
     }
 

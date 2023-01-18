@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * @author xck
+ */
 @RestController
 @RequestMapping("/comment")
 public class DynamicCommentController {
@@ -20,22 +23,27 @@ public class DynamicCommentController {
     }
 
     @PostMapping("/")
-    public List<DynamicCommentVO> page(@RequestBody @Validated DynamicCommentDTO dynamicCommentDTO){
+    public List<DynamicCommentVO> page(@RequestBody @Validated DynamicCommentDTO dynamicCommentDTO) {
         return dynamicCommentService.getByPage(dynamicCommentDTO);
     }
 
     @PostMapping("/addComment")
-    public DynamicComment addComment(@RequestBody DynamicComment dynamicComment){
+    public DynamicComment addComment(@RequestBody DynamicComment dynamicComment) {
         return dynamicCommentService.addComment(dynamicComment);
     }
 
     @PostMapping("/getReply")
-    public List<DynamicCommentVO> getReply(@RequestBody DynamicCommentDTO dynamicCommentDTO){
+    public List<DynamicCommentVO> getReply(@RequestBody DynamicCommentDTO dynamicCommentDTO) {
         return dynamicCommentService.getReply(dynamicCommentDTO);
     }
 
     @GetMapping("/getCommentCount/{id}")
-    public DynamicCommentVO getCommentCount(@PathVariable("id") Long id){
+    public DynamicCommentVO getCommentCount(@PathVariable("id") Long id) {
         return dynamicCommentService.getCommentCount(id);
+    }
+
+    @GetMapping("/getYesterdayData/{type}")
+    public DynamicCommentVO getYesterdayData(@PathVariable("type") Integer type) {
+        return dynamicCommentService.getYesterdayData(type);
     }
 }

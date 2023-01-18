@@ -1,5 +1,8 @@
 package com.bilibili.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -9,12 +12,10 @@ import com.bilibili.mapper.DynamicCommentMapper;
 import com.bilibili.mapper.DynamicMapper;
 import com.bilibili.mapper.StarMapper;
 import com.bilibili.mapper.UserMapper;
-import com.bilibili.pojo.Dynamic;
-import com.bilibili.pojo.DynamicComment;
-import com.bilibili.pojo.Star;
-import com.bilibili.pojo.User;
+import com.bilibili.pojo.*;
 import com.bilibili.service.StarService;
 import com.bilibili.utils.UserThreadLocal;
+import com.bilibili.vo.BarrageVO;
 import com.bilibili.vo.StarVO;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.bilibili.utils.Constant.VIDEO_TYPE;
 
 /**
  * @author xck
@@ -153,6 +156,37 @@ public class StarServiceImpl extends ServiceImpl<StarMapper, Star> implements St
         }
 
         return starVOS;
+    }
+
+    @Override
+    public StarVO getYesterdayData(Integer type) {
+        StarVO starVO = new StarVO();
+        starVO.setStarNum(0);
+        DateTime yesterdayDateTime = DateUtil.yesterday();
+        String yesterday = yesterdayDateTime.toDateStr();
+        String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
+
+
+        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
+        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
+        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
+
+        List<Long> dynamicIds = new ArrayList<>();
+
+        for (Dynamic dynamic : dynamicList) {
+            dynamicIds.add(dynamic.getId());
+        }
+
+        if (!dynamicIds.isEmpty()) {
+            LambdaQueryWrapper<Star> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.ge(Star::getCreateTime, yesterday);
+            queryWrapper.lt(Star::getCreateTime, today);
+            queryWrapper.in(Star::getDynamicId, dynamicIds);
+
+            starVO.setStarNum(this.count(queryWrapper));
+        }
+        return starVO;
     }
 
     private Map<Long, User> getUserMap(List<Long> userIds) {

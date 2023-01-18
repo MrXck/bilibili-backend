@@ -14,4 +14,5 @@ public class Play {
     private Long userId;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+    private Integer isDelete;
 }

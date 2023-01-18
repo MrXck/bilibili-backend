@@ -37,4 +37,11 @@ public interface PlayService extends IService<Play> {
      * @param playDTO 动态id
      */
     void addPlay(PlayDTO playDTO);
+
+    /**
+     * 获取昨天新增播放量
+     * @param type 动态类型
+     * @return 昨天新增播放量
+     */
+    PlayVO getYesterdayData(Integer type);
 }

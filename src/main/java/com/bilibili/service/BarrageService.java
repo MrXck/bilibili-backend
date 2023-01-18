@@ -29,4 +29,11 @@ public interface BarrageService extends IService<Barrage> {
      * @return 弹幕数
      */
     BarrageVO getBarrageNumByDynamicId(Long id);
+
+    /**
+     * 获取昨日新增弹幕数
+     * @param type 动态类型
+     * @return 昨日新增弹幕数
+     */
+    BarrageVO getYesterdayData(Integer type);
 }

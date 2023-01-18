@@ -1,5 +1,8 @@
 package com.bilibili.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.bilibili.utils.Constant.*;
 
 /**
  * @author xck
@@ -84,7 +89,10 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
 
     @Override
     public void delete(Long id) throws Exception {
-        Play play = this.getById(id);
+        LambdaQueryWrapper<Play> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Play::getIsDelete, NOT_DELETE);
+        queryWrapper.eq(Play::getId, id);
+        Play play = this.getOne(queryWrapper);
         if (play == null) {
             throw new Exception();
         }
@@ -93,7 +101,9 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
             throw new APIException("删除失败");
         }
 
-        this.removeById(id);
+        play.setUpdateTime(LocalDateTime.now());
+        play.setIsDelete(DELETE);
+        this.save(play);
     }
 
     @Override
@@ -122,8 +132,40 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
             play.setDynamicId(dynamicId);
             play.setCreateTime(LocalDateTime.now());
             play.setUpdateTime(LocalDateTime.now());
+            play.setIsDelete(NOT_DELETE);
             this.save(play);
         }
+    }
+
+    @Override
+    public PlayVO getYesterdayData(Integer type) {
+        PlayVO playVO = new PlayVO();
+        playVO.setPlayNum(0);
+        DateTime yesterdayDateTime = DateUtil.yesterday();
+        String yesterday = yesterdayDateTime.toDateStr();
+        String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
+
+
+        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
+        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
+        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
+
+        List<Long> dynamicIds = new ArrayList<>();
+
+        for (Dynamic dynamic : dynamicList) {
+            dynamicIds.add(dynamic.getId());
+        }
+
+        if (!dynamicIds.isEmpty()) {
+            LambdaQueryWrapper<Play> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.ge(Play::getCreateTime, yesterday);
+            queryWrapper.lt(Play::getCreateTime, today);
+            queryWrapper.in(Play::getDynamicId, dynamicIds);
+
+            playVO.setPlayNum(this.count(queryWrapper));
+        }
+        return playVO;
     }
 
 

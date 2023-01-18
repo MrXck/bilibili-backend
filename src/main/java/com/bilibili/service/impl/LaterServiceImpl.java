@@ -2,6 +2,7 @@ package com.bilibili.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.bilibili.dto.LaterDTO;
 import com.bilibili.mapper.DynamicMapper;
 import com.bilibili.mapper.LaterMapper;
 import com.bilibili.mapper.PlayMapper;
@@ -120,6 +121,26 @@ public class LaterServiceImpl extends ServiceImpl<LaterMapper, Later> implements
                 queryWrapper.in(Later::getDynamicId, dynamicIds);
                 this.remove(queryWrapper);
             }
+        }
+    }
+
+    @Override
+    public void addLater(LaterDTO laterDTO) {
+        Long userId = UserThreadLocal.get();
+        Long dynamicId = laterDTO.getDynamicId();
+        Long dynamicUserId = laterDTO.getDynamicUserId();
+
+        LambdaQueryWrapper<Later> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Later::getUserId, userId);
+        queryWrapper.eq(Later::getDynamicId, dynamicId);
+        queryWrapper.eq(Later::getDynamicUserId, dynamicUserId);
+        int count = this.count(queryWrapper);
+        if (count < 1) {
+            Later later = new Later();
+            later.setDynamicId(dynamicId);
+            later.setUserId(userId);
+            later.setDynamicUserId(dynamicUserId);
+            this.save(later);
         }
     }
 

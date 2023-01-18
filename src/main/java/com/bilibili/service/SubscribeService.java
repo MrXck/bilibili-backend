@@ -73,4 +73,10 @@ public interface SubscribeService extends IService<Subscribe> {
      * @param id 用户id
      */
     void unsubscribe(Long id);
+
+    /**
+     * 获取昨天新增粉丝数
+     * @return 昨天新增粉丝数
+     */
+    SubscribeVO getYesterdayData();
 }

@@ -1,11 +1,9 @@
 package com.bilibili.controller;
 
+import com.bilibili.dto.LaterDTO;
 import com.bilibili.service.LaterService;
 import com.bilibili.vo.LaterVO;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,6 +40,12 @@ public class LaterController {
     @GetMapping("/deleteView")
     public String deleteView() {
         laterService.deleteView();
+        return "";
+    }
+
+    @PostMapping("/add")
+    public String addLater(@RequestBody LaterDTO laterDTO){
+        laterService.addLater(laterDTO);
         return "";
     }
 }

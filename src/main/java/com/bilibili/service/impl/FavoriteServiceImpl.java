@@ -1,5 +1,8 @@
 package com.bilibili.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -9,6 +12,7 @@ import com.bilibili.mapper.*;
 import com.bilibili.pojo.*;
 import com.bilibili.service.FavoriteService;
 import com.bilibili.utils.UserThreadLocal;
+import com.bilibili.vo.BarrageVO;
 import com.bilibili.vo.FavoriteVO;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.bilibili.utils.Constant.VIDEO_TYPE;
 
 /**
  * @author xck
@@ -210,6 +216,37 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
         }
 
         this.saveBatch(favoriteList);
+    }
+
+    @Override
+    public FavoriteVO getYesterdayData(Integer type) {
+        FavoriteVO favoriteVO = new FavoriteVO();
+        favoriteVO.setCollectNum(0);
+        DateTime yesterdayDateTime = DateUtil.yesterday();
+        String yesterday = yesterdayDateTime.toDateStr();
+        String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
+
+
+        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
+        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
+        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
+
+        List<Long> dynamicIds = new ArrayList<>();
+
+        for (Dynamic dynamic : dynamicList) {
+            dynamicIds.add(dynamic.getId());
+        }
+
+        if (!dynamicIds.isEmpty()) {
+            LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.ge(Favorite::getCreateTime, yesterday);
+            queryWrapper.lt(Favorite::getCreateTime, today);
+            queryWrapper.in(Favorite::getDynamicId, dynamicIds);
+
+            favoriteVO.setCollectNum(this.count(queryWrapper));
+        }
+        return favoriteVO;
     }
 
 

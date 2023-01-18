@@ -30,4 +30,11 @@ public interface FavoriteService extends IService<Favorite> {
      * @param favoriteDTO 动态id 要放入的收藏夹
      */
     void putInFavorite(FavoriteDTO favoriteDTO);
+
+    /**
+     * 获取昨日新增收藏数
+     * @param type 动态类型
+     * @return 昨日新增收藏数
+     */
+    FavoriteVO getYesterdayData(Integer type);
 }

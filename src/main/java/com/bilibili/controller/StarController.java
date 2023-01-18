@@ -22,23 +22,23 @@ public class StarController {
     }
 
     @GetMapping("/getDynamicStarNum/{id}")
-    public StarVO getDynamicStarNum(@PathVariable("id") Long id){
+    public StarVO getDynamicStarNum(@PathVariable("id") Long id) {
         return starService.getDynamicStarNum(id);
     }
 
     @GetMapping("/getCommentStarNum/{id}")
-    public StarVO getCommentStarNum(@PathVariable("id") Long id){
+    public StarVO getCommentStarNum(@PathVariable("id") Long id) {
         return starService.getCommentStarNum(id);
     }
 
     @PostMapping("/star")
-    public String star(@RequestBody Star star){
+    public String star(@RequestBody Star star) {
         starService.star(star);
         return "";
     }
 
     @PostMapping("/unStar")
-    public String unStar(@RequestBody Star star){
+    public String unStar(@RequestBody Star star) {
         starService.unStar(star);
         return "";
     }
@@ -48,4 +48,8 @@ public class StarController {
         return starService.getStar(starDTO);
     }
 
+    @GetMapping("/getYesterdayData/{type}")
+    public StarVO getYesterdayData(@PathVariable("type") Integer type) {
+        return starService.getYesterdayData(type);
+    }
 }

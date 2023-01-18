@@ -21,18 +21,18 @@ public class PlayController {
     }
 
     @PostMapping("/page")
-    public List<PlayVO> page(@RequestBody PlayDTO playDTO){
+    public List<PlayVO> page(@RequestBody PlayDTO playDTO) {
         return playService.getByPage(playDTO);
     }
 
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Long id) throws Exception{
+    public String delete(@PathVariable("id") Long id) throws Exception {
         playService.delete(id);
         return "";
     }
 
     @GetMapping("/getPlayNum/{id}")
-    public PlayVO getPlayNumByDynamicId(@PathVariable("id") Long id){
+    public PlayVO getPlayNumByDynamicId(@PathVariable("id") Long id) {
         return playService.getPlayNumByDynamicId(id);
     }
 
@@ -40,5 +40,10 @@ public class PlayController {
     public String addPlay(@RequestBody PlayDTO playDTO) {
         playService.addPlay(playDTO);
         return "";
+    }
+
+    @GetMapping("/getYesterdayData/{type}")
+    public PlayVO getYesterdayData(@PathVariable("type") Integer type) {
+        return playService.getYesterdayData(type);
     }
 }

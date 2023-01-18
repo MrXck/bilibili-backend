@@ -3,10 +3,7 @@ package com.bilibili.controller;
 import com.bilibili.dto.FavoriteDTO;
 import com.bilibili.service.FavoriteService;
 import com.bilibili.vo.FavoriteVO;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,4 +36,8 @@ public class FavoriteController {
         return "";
     }
 
+    @GetMapping("/getYesterdayData/{type}")
+    public FavoriteVO getYesterdayData(@PathVariable("type") Integer type) {
+        return favoriteService.getYesterdayData(type);
+    }
 }

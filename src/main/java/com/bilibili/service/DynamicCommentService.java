@@ -38,4 +38,11 @@ public interface DynamicCommentService extends IService<DynamicComment> {
      * @return 评论数
      */
     DynamicCommentVO getCommentCount(Long id);
+
+    /**
+     * 获取昨日新增评论数
+     * @param type 动态类型
+     * @return 昨日新增评论数
+     */
+    DynamicCommentVO getYesterdayData(Integer type);
 }

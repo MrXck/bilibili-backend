@@ -1,6 +1,7 @@
 package com.bilibili.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.bilibili.dto.LaterDTO;
 import com.bilibili.pojo.Later;
 import com.bilibili.vo.LaterVO;
 
@@ -31,4 +32,10 @@ public interface LaterService extends IService<Later> {
      * 删除已观看的稍后在看
      */
     void deleteView();
+
+    /**
+     * 增加稍后再看
+     * @param laterDTO 动态id
+     */
+    void addLater(LaterDTO laterDTO);
 }

@@ -1,5 +1,8 @@
 package com.bilibili.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -174,6 +177,23 @@ public class SubscribeServiceImpl extends ServiceImpl<SubscribeMapper, Subscribe
         } else {
             throw new APIException("没有关注此用户");
         }
+    }
+
+    @Override
+    public SubscribeVO getYesterdayData() {
+        SubscribeVO subscribeVO = new SubscribeVO();
+        DateTime yesterdayDateTime = DateUtil.yesterday();
+        String yesterday = yesterdayDateTime.toDateStr();
+        String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
+
+        LambdaQueryWrapper<Subscribe> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.ge(Subscribe::getCreateTime, yesterday);
+        queryWrapper.lt(Subscribe::getCreateTime, today);
+        queryWrapper.eq(Subscribe::getSubscribeId, UserThreadLocal.get());
+
+        subscribeVO.setSubscribeNum(this.count(queryWrapper));
+
+        return subscribeVO;
     }
 
     private List<User> getUsers(List<Long> userIds) {

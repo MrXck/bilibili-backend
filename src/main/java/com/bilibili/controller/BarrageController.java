@@ -26,13 +26,18 @@ public class BarrageController {
     }
 
     @PostMapping("/sendBarrage")
-    public String sendBarrage(@RequestBody Barrage barrage){
+    public String sendBarrage(@RequestBody Barrage barrage) {
         barrageService.sendBarrage(barrage);
         return "";
     }
 
     @GetMapping("/getBarrageNum/{id}")
-    public BarrageVO getBarrageNumByDynamicId(@PathVariable("id") Long id){
+    public BarrageVO getBarrageNumByDynamicId(@PathVariable("id") Long id) {
         return barrageService.getBarrageNumByDynamicId(id);
+    }
+
+    @GetMapping("/getYesterdayData/{type}")
+    public BarrageVO getYesterdayData(@PathVariable("type") Integer type) {
+        return barrageService.getYesterdayData(type);
     }
 }
