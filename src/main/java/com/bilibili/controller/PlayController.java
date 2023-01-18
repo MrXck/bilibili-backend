@@ -5,6 +5,7 @@ import com.bilibili.service.PlayService;
 import com.bilibili.vo.PlayVO;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -45,5 +46,15 @@ public class PlayController {
     @GetMapping("/getYesterdayData/{type}")
     public PlayVO getYesterdayData(@PathVariable("type") Integer type) {
         return playService.getYesterdayData(type);
+    }
+
+    @GetMapping("/getAllData/{type}")
+    public PlayVO getAllData(@PathVariable("type") Integer type) {
+        return playService.getAllData(type);
+    }
+
+    @GetMapping("/getLastSevenDaysData/{type}")
+    public LinkedHashMap<String, Long> getLastSevenDaysData(@PathVariable("type") Integer type) {
+        return playService.getLastSevenDaysData(type);
     }
 }

@@ -5,6 +5,8 @@ import com.bilibili.dto.SubscribeDTO;
 import com.bilibili.pojo.Subscribe;
 import com.bilibili.vo.SubscribeVO;
 
+import java.util.LinkedHashMap;
+
 /**
  * @author xck
  */
@@ -79,4 +81,11 @@ public interface SubscribeService extends IService<Subscribe> {
      * @return 昨天新增粉丝数
      */
     SubscribeVO getYesterdayData();
+
+    /**
+     * 获取近7日新增粉丝数
+     * @param type 动态类型
+     * @return 近7日新增粉丝数
+     */
+    LinkedHashMap<String, Long> getLastSevenDaysData(Integer type);
 }

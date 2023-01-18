@@ -5,6 +5,7 @@ import com.bilibili.dto.DynamicCommentDTO;
 import com.bilibili.pojo.DynamicComment;
 import com.bilibili.vo.DynamicCommentVO;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -45,4 +46,18 @@ public interface DynamicCommentService extends IService<DynamicComment> {
      * @return 昨日新增评论数
      */
     DynamicCommentVO getYesterdayData(Integer type);
+
+    /**
+     * 获取所有评论数
+     * @param type 动态类型
+     * @return 所有评论数
+     */
+    DynamicCommentVO getAllData(Integer type);
+
+    /**
+     * 获取近7日所有评论数
+     * @param type 动态类型
+     * @return 近7日所有评论数
+     */
+    LinkedHashMap<String, Long> getLastSevenDaysData(Integer type);
 }

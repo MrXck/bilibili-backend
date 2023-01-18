@@ -5,6 +5,7 @@ import com.bilibili.dto.StarDTO;
 import com.bilibili.pojo.Star;
 import com.bilibili.vo.StarVO;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -50,4 +51,18 @@ public interface StarService extends IService<Star> {
      * @return 昨日新增点赞数
      */
     StarVO getYesterdayData(Integer type);
+
+    /**
+     * 获取所有点赞数
+     * @param type 动态类型
+     * @return 点赞数
+     */
+    StarVO getAllData(Integer type);
+
+    /**
+     * 获取近7日所有点赞数
+     * @param type 动态类型
+     * @return 近7日所有点赞数
+     */
+    LinkedHashMap<String, Long> getLastSevenDaysData(Integer type);
 }

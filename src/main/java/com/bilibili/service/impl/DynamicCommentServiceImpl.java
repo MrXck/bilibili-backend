@@ -11,7 +11,6 @@ import com.bilibili.exception.APIException;
 import com.bilibili.mapper.DynamicCommentMapper;
 import com.bilibili.mapper.DynamicMapper;
 import com.bilibili.mapper.UserMapper;
-import com.bilibili.pojo.Dynamic;
 import com.bilibili.pojo.DynamicComment;
 import com.bilibili.pojo.User;
 import com.bilibili.service.DynamicCommentService;
@@ -21,12 +20,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.bilibili.utils.Constant.VIDEO_TYPE;
+import static com.bilibili.utils.ServiceUtils.*;
 
 /**
  * @author xck
@@ -82,7 +81,7 @@ public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper,
             return commentVO;
         }).collect(Collectors.toList());
 
-        getDynamicCommentVOS(getUserMap(userIds), list);
+        getDynamicCommentVOS(getUserMap(userIds, userMapper), list);
 
         DynamicCommentVO dynamicCommentVO = new DynamicCommentVO();
         dynamicCommentVO.setPage(dynamicCommentPage);
@@ -153,7 +152,7 @@ public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper,
                 }
             });
 
-            userMap = getUserMap(userIds);
+            userMap = getUserMap(userIds, userMapper);
 
             for (DynamicCommentVO dynamicCommentVO : dynamicCommentVOList) {
                 for (DynamicComment dynamicComment : dynamicComments) {
@@ -170,7 +169,7 @@ public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper,
         }
 
         if (userMap == null) {
-            userMap = getUserMap(userIds);
+            userMap = getUserMap(userIds, userMapper);
         }
 
 
@@ -198,16 +197,7 @@ public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper,
         String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
 
 
-        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
-        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
-        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
-
-        List<Long> dynamicIds = new ArrayList<>();
-
-        for (Dynamic dynamic : dynamicList) {
-            dynamicIds.add(dynamic.getId());
-        }
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
 
         if (!dynamicIds.isEmpty()) {
             LambdaQueryWrapper<DynamicComment> queryWrapper = new LambdaQueryWrapper<>();
@@ -218,6 +208,49 @@ public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper,
             dynamicCommentVO.setCommentNum(this.count(queryWrapper));
         }
         return dynamicCommentVO;
+    }
+
+    @Override
+    public DynamicCommentVO getAllData(Integer type) {
+        DynamicCommentVO dynamicCommentVO = new DynamicCommentVO();
+        dynamicCommentVO.setCommentNum(0);
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
+
+        if (!dynamicIds.isEmpty()) {
+            LambdaQueryWrapper<DynamicComment> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.in(DynamicComment::getDynamicId, dynamicIds);
+
+            dynamicCommentVO.setCommentNum(this.count(queryWrapper));
+        }
+        return dynamicCommentVO;
+    }
+
+    @Override
+    public LinkedHashMap<String, Long> getLastSevenDaysData(Integer type) {
+        String endTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, 1).toDateStr();
+        String startTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, -6).toDateStr();
+
+        LinkedHashMap<String, Long> map = getSevenDaysMap();
+
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
+
+        if (!dynamicIds.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < dynamicIds.size(); i++) {
+                if (i == 0) {
+                    sb.append(dynamicIds.get(i));
+                } else {
+                    sb.append(",").append(dynamicIds.get(i));
+                }
+            }
+            List<Map<String, Object>> allData = this.baseMapper.getAllData(startTime, endTime, sb.toString());
+
+            for (Map<String, Object> allDatum : allData) {
+                map.put(allDatum.get("dat").toString(), (Long) allDatum.get("num"));
+            }
+        }
+
+        return map;
     }
 
     private void getDynamicCommentVOS(Map<Long, User> userMap, List<DynamicCommentVO> dynamicCommentVOList) {
@@ -241,23 +274,6 @@ public class DynamicCommentServiceImpl extends ServiceImpl<DynamicCommentMapper,
             }
             dynamicCommentVO.setReplyUser(user);
         }
-    }
-
-    private Map<Long, User> getUserMap(List<Long> userIds) {
-        Map<Long, User> userMap = new HashMap<>(16);
-
-        if (!userIds.isEmpty()) {
-            // 解决 n + 1 问题
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.in(User::getId, userIds);
-            List<User> userList = userMapper.selectList(userLambdaQueryWrapper);
-
-            for (User user : userList) {
-                userMap.put(user.getId(), user);
-            }
-        }
-
-        return userMap;
     }
 
 }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.bilibili.pojo.Barrage;
 import com.bilibili.vo.BarrageVO;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -36,4 +37,18 @@ public interface BarrageService extends IService<Barrage> {
      * @return 昨日新增弹幕数
      */
     BarrageVO getYesterdayData(Integer type);
+
+    /**
+     * 获取所有弹幕数
+     * @param type 动态类型
+     * @return 所有弹幕数
+     */
+    BarrageVO getAllData(Integer type);
+
+    /**
+     * 获取近7日所有弹幕数
+     * @param type 动态类型
+     * @return 近7日所有弹幕数
+     */
+    LinkedHashMap<String, Long> getLastSevenDaysData(Integer type);
 }

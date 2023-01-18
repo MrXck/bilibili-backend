@@ -5,6 +5,7 @@ import com.bilibili.service.BarrageService;
 import com.bilibili.vo.BarrageVO;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -39,5 +40,15 @@ public class BarrageController {
     @GetMapping("/getYesterdayData/{type}")
     public BarrageVO getYesterdayData(@PathVariable("type") Integer type) {
         return barrageService.getYesterdayData(type);
+    }
+
+    @GetMapping("/getAllData/{type}")
+    public BarrageVO getAllData(@PathVariable("type") Integer type) {
+        return barrageService.getAllData(type);
+    }
+
+    @GetMapping("/getLastSevenDaysData/{type}")
+    public LinkedHashMap<String, Long> getLastSevenDaysData(@PathVariable("type") Integer type) {
+        return barrageService.getLastSevenDaysData(type);
     }
 }

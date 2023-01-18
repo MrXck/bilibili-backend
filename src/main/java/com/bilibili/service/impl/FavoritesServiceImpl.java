@@ -118,7 +118,6 @@ public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites
             throw new APIException("创建失败");
         }
 
-
         Favorites favorites = favoritesDTO.getFavorites();
         favorites.setUserId(UserThreadLocal.get());
         favorites.setCreateTime(LocalDateTime.now());

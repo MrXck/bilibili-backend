@@ -20,12 +20,11 @@ import com.bilibili.vo.PlayVO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static com.bilibili.utils.Constant.*;
+import static com.bilibili.utils.Constant.DELETE;
+import static com.bilibili.utils.Constant.NOT_DELETE;
+import static com.bilibili.utils.ServiceUtils.*;
 
 /**
  * @author xck
@@ -72,8 +71,8 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
 
         List<PlayVO> playVOS = new ArrayList<>();
 
-        Map<Long, User> userMap = getUserMap(userIds);
-        Map<Long, Dynamic> dynamicMap = getDynamicMap(dynamicIds);
+        Map<Long, User> userMap = getUserMap(userIds, userMapper);
+        Map<Long, Dynamic> dynamicMap = getDynamicMap(dynamicIds, dynamicMapper);
 
         for (Play record : records) {
             PlayVO playVO = new PlayVO();
@@ -146,16 +145,7 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
         String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
 
 
-        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
-        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
-        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
-
-        List<Long> dynamicIds = new ArrayList<>();
-
-        for (Dynamic dynamic : dynamicList) {
-            dynamicIds.add(dynamic.getId());
-        }
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
 
         if (!dynamicIds.isEmpty()) {
             LambdaQueryWrapper<Play> queryWrapper = new LambdaQueryWrapper<>();
@@ -168,38 +158,48 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
         return playVO;
     }
 
+    @Override
+    public PlayVO getAllData(Integer type) {
+        PlayVO playVO = new PlayVO();
+        playVO.setPlayNum(0);
 
-    private Map<Long, User> getUserMap(List<Long> userIds) {
-        Map<Long, User> userMap = new HashMap<>(16);
-
-        if (!userIds.isEmpty()) {
-            // 解决 n + 1 问题
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.in(User::getId, userIds);
-            List<User> userList = userMapper.selectList(userLambdaQueryWrapper);
-
-            for (User user : userList) {
-                userMap.put(user.getId(), user);
-            }
-        }
-
-        return userMap;
-    }
-
-    private Map<Long, Dynamic> getDynamicMap(List<Long> dynamicIds) {
-        Map<Long, Dynamic> dynamicMap = new HashMap<>(16);
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
 
         if (!dynamicIds.isEmpty()) {
-            // 解决 n + 1 问题
-            LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            dynamicLambdaQueryWrapper.in(Dynamic::getId, dynamicIds);
-            List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
+            LambdaQueryWrapper<Play> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.in(Play::getDynamicId, dynamicIds);
 
-            for (Dynamic dynamic : dynamicList) {
-                dynamicMap.put(dynamic.getId(), dynamic);
+            playVO.setPlayNum(this.count(queryWrapper));
+        }
+        return playVO;
+    }
+
+    @Override
+    public LinkedHashMap<String, Long> getLastSevenDaysData(Integer type) {
+        String endTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, 1).toDateStr();
+        String startTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, -6).toDateStr();
+
+        LinkedHashMap<String, Long> map = getSevenDaysMap();
+
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
+
+        if (!dynamicIds.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < dynamicIds.size(); i++) {
+                if (i == 0) {
+                    sb.append(dynamicIds.get(i));
+                } else {
+                    sb.append(",").append(dynamicIds.get(i));
+                }
+            }
+            List<Map<String, Object>> allData = this.baseMapper.getAllData(startTime, endTime, sb.toString());
+
+            for (Map<String, Object> allDatum : allData) {
+                map.put(allDatum.get("dat").toString(), (Long) allDatum.get("num"));
             }
         }
 
-        return dynamicMap;
+        return map;
     }
+
 }

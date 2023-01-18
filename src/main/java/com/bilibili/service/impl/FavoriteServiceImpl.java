@@ -12,7 +12,6 @@ import com.bilibili.mapper.*;
 import com.bilibili.pojo.*;
 import com.bilibili.service.FavoriteService;
 import com.bilibili.utils.UserThreadLocal;
-import com.bilibili.vo.BarrageVO;
 import com.bilibili.vo.FavoriteVO;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.bilibili.utils.Constant.VIDEO_TYPE;
+import static com.bilibili.utils.ServiceUtils.getDynamicIds;
+import static com.bilibili.utils.ServiceUtils.getUserMap;
 
 /**
  * @author xck
@@ -115,7 +115,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
                 dynamicMap.put(dynamic.getId(), dynamic);
             }
 
-            Map<Long, User> userMap = getUserMap(userIds);
+            Map<Long, User> userMap = getUserMap(userIds, userMapper);
 
             for (Favorite favorite : records) {
                 favoriteVO = new FavoriteVO();
@@ -227,16 +227,7 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
         String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
 
 
-        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
-        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
-        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
-
-        List<Long> dynamicIds = new ArrayList<>();
-
-        for (Dynamic dynamic : dynamicList) {
-            dynamicIds.add(dynamic.getId());
-        }
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
 
         if (!dynamicIds.isEmpty()) {
             LambdaQueryWrapper<Favorite> queryWrapper = new LambdaQueryWrapper<>();
@@ -247,24 +238,6 @@ public class FavoriteServiceImpl extends ServiceImpl<FavoriteMapper, Favorite> i
             favoriteVO.setCollectNum(this.count(queryWrapper));
         }
         return favoriteVO;
-    }
-
-
-    private Map<Long, User> getUserMap(List<Long> userIds) {
-        Map<Long, User> userMap = new HashMap<>(16);
-
-        if (!userIds.isEmpty()) {
-            // 解决 n + 1 问题
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.in(User::getId, userIds);
-            List<User> userList = userMapper.selectList(userLambdaQueryWrapper);
-
-            for (User user : userList) {
-                userMap.put(user.getId(), user);
-            }
-        }
-
-        return userMap;
     }
 
 }

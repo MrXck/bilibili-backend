@@ -7,6 +7,7 @@ import com.bilibili.vo.DynamicCommentVO;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -45,5 +46,15 @@ public class DynamicCommentController {
     @GetMapping("/getYesterdayData/{type}")
     public DynamicCommentVO getYesterdayData(@PathVariable("type") Integer type) {
         return dynamicCommentService.getYesterdayData(type);
+    }
+
+    @GetMapping("/getAllData/{type}")
+    public DynamicCommentVO getAllData(@PathVariable("type") Integer type) {
+        return dynamicCommentService.getAllData(type);
+    }
+
+    @GetMapping("/getLastSevenDaysData/{type}")
+    public LinkedHashMap<String, Long> getLastSevenDaysData(@PathVariable("type") Integer type) {
+        return dynamicCommentService.getLastSevenDaysData(type);
     }
 }

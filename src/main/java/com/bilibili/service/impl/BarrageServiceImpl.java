@@ -9,7 +9,6 @@ import com.bilibili.exception.APIException;
 import com.bilibili.mapper.BarrageMapper;
 import com.bilibili.mapper.DynamicMapper;
 import com.bilibili.pojo.Barrage;
-import com.bilibili.pojo.Dynamic;
 import com.bilibili.service.BarrageService;
 import com.bilibili.utils.UserThreadLocal;
 import com.bilibili.vo.BarrageVO;
@@ -17,9 +16,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import static com.bilibili.utils.Constant.VIDEO_TYPE;
+import static com.bilibili.utils.ServiceUtils.getDynamicIds;
+import static com.bilibili.utils.ServiceUtils.getSevenDaysMap;
 
 /**
  * @author xck
@@ -88,16 +90,7 @@ public class BarrageServiceImpl extends ServiceImpl<BarrageMapper, Barrage> impl
         String today = DateUtil.offset(yesterdayDateTime, DateField.DAY_OF_YEAR, 1).toDateStr();
 
 
-        LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        dynamicLambdaQueryWrapper.eq(Dynamic::getUserId, UserThreadLocal.get());
-        dynamicLambdaQueryWrapper.eq(Dynamic::getType, type);
-        List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
-
-        List<Long> dynamicIds = new ArrayList<>();
-
-        for (Dynamic dynamic : dynamicList) {
-            dynamicIds.add(dynamic.getId());
-        }
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
 
         if (!dynamicIds.isEmpty()) {
             LambdaQueryWrapper<Barrage> queryWrapper = new LambdaQueryWrapper<>();
@@ -108,5 +101,48 @@ public class BarrageServiceImpl extends ServiceImpl<BarrageMapper, Barrage> impl
             barrageVO.setBarrageNum(this.count(queryWrapper));
         }
         return barrageVO;
+    }
+
+    @Override
+    public BarrageVO getAllData(Integer type) {
+        BarrageVO barrageVO = new BarrageVO();
+        barrageVO.setBarrageNum(0);
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
+
+        if (!dynamicIds.isEmpty()) {
+            LambdaQueryWrapper<Barrage> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.in(Barrage::getDynamicId, dynamicIds);
+
+            barrageVO.setBarrageNum(this.count(queryWrapper));
+        }
+        return barrageVO;
+    }
+
+    @Override
+    public LinkedHashMap<String, Long> getLastSevenDaysData(Integer type) {
+        String endTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, 1).toDateStr();
+        String startTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, -6).toDateStr();
+
+        LinkedHashMap<String, Long> map = getSevenDaysMap();
+
+        List<Long> dynamicIds = getDynamicIds(type, dynamicMapper);
+
+        if (!dynamicIds.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < dynamicIds.size(); i++) {
+                if (i == 0) {
+                    sb.append(dynamicIds.get(i));
+                } else {
+                    sb.append(",").append(dynamicIds.get(i));
+                }
+            }
+            List<Map<String, Object>> allData = this.baseMapper.getAllData(startTime, endTime, sb.toString());
+
+            for (Map<String, Object> allDatum : allData) {
+                map.put(allDatum.get("dat").toString(), (Long) allDatum.get("num"));
+            }
+        }
+
+        return map;
     }
 }

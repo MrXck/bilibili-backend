@@ -17,9 +17,11 @@ import com.bilibili.vo.LaterVO;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.bilibili.utils.ServiceUtils.getDynamicMap;
+import static com.bilibili.utils.ServiceUtils.getUserMap;
 
 /**
  * @author xck
@@ -55,8 +57,8 @@ public class LaterServiceImpl extends ServiceImpl<LaterMapper, Later> implements
             dynamicIds.add(later.getDynamicId());
         }
 
-        Map<Long, User> userMap = getUserMap(userIds);
-        Map<Long, Dynamic> dynamicMap = getDynamicMap(dynamicIds);
+        Map<Long, User> userMap = getUserMap(userIds, userMapper);
+        Map<Long, Dynamic> dynamicMap = getDynamicMap(dynamicIds, dynamicMapper);
 
 
         List<LaterVO> list = new ArrayList<>();
@@ -142,40 +144,5 @@ public class LaterServiceImpl extends ServiceImpl<LaterMapper, Later> implements
             later.setDynamicUserId(dynamicUserId);
             this.save(later);
         }
-    }
-
-
-    private Map<Long, User> getUserMap(List<Long> userIds) {
-        Map<Long, User> userMap = new HashMap<>(16);
-
-        if (!userIds.isEmpty()) {
-            // 解决 n + 1 问题
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.in(User::getId, userIds);
-            List<User> userList = userMapper.selectList(userLambdaQueryWrapper);
-
-            for (User user : userList) {
-                userMap.put(user.getId(), user);
-            }
-        }
-
-        return userMap;
-    }
-
-    private Map<Long, Dynamic> getDynamicMap(List<Long> dynamicIds) {
-        Map<Long, Dynamic> dynamicMap = new HashMap<>(16);
-
-        if (!dynamicIds.isEmpty()) {
-            // 解决 n + 1 问题
-            LambdaQueryWrapper<Dynamic> dynamicLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            dynamicLambdaQueryWrapper.in(Dynamic::getId, dynamicIds);
-            List<Dynamic> dynamicList = dynamicMapper.selectList(dynamicLambdaQueryWrapper);
-
-            for (Dynamic dynamic : dynamicList) {
-                dynamicMap.put(dynamic.getId(), dynamic);
-            }
-        }
-
-        return dynamicMap;
     }
 }

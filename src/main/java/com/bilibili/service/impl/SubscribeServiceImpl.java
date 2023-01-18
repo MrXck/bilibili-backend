@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bilibili.dto.SubscribeDTO;
 import com.bilibili.exception.APIException;
+import com.bilibili.mapper.DynamicMapper;
 import com.bilibili.mapper.SubscribeMapper;
 import com.bilibili.mapper.UserMapper;
 import com.bilibili.pojo.Subscribe;
@@ -19,7 +20,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.bilibili.utils.ServiceUtils.getDynamicIds;
+import static com.bilibili.utils.ServiceUtils.getSevenDaysMap;
 
 /**
  * @author xck
@@ -29,8 +35,11 @@ public class SubscribeServiceImpl extends ServiceImpl<SubscribeMapper, Subscribe
 
     private final UserMapper userMapper;
 
-    public SubscribeServiceImpl(UserMapper userMapper) {
+    private final DynamicMapper dynamicMapper;
+
+    public SubscribeServiceImpl(UserMapper userMapper, DynamicMapper dynamicMapper) {
         this.userMapper = userMapper;
+        this.dynamicMapper = dynamicMapper;
     }
 
     @Override
@@ -55,7 +64,6 @@ public class SubscribeServiceImpl extends ServiceImpl<SubscribeMapper, Subscribe
 
     @Override
     public SubscribeVO getSubscribe(SubscribeDTO subscribeDTO) {
-
         Long userId = subscribeDTO.getUserId();
 
         if (userId == null) {
@@ -194,6 +202,22 @@ public class SubscribeServiceImpl extends ServiceImpl<SubscribeMapper, Subscribe
         subscribeVO.setSubscribeNum(this.count(queryWrapper));
 
         return subscribeVO;
+    }
+
+    @Override
+    public LinkedHashMap<String, Long> getLastSevenDaysData(Integer type) {
+        String endTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, 1).toDateStr();
+        String startTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, -6).toDateStr();
+
+        LinkedHashMap<String, Long> map = getSevenDaysMap();
+
+        List<Map<String, Object>> allData = this.baseMapper.getAllData(startTime, endTime, UserThreadLocal.get());
+
+        for (Map<String, Object> allDatum : allData) {
+            map.put(allDatum.get("dat").toString(), (Long) allDatum.get("num"));
+        }
+
+        return map;
     }
 
     private List<User> getUsers(List<Long> userIds) {

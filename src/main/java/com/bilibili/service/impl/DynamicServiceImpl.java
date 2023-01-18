@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.bilibili.utils.Constant.*;
+import static com.bilibili.utils.ServiceUtils.getUserMap;
 
 /**
  * @author xck
@@ -79,7 +80,7 @@ public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> impl
 
         if (!userIds.isEmpty()) {
 
-            Map<Long, User> userMap = getUserMap(userIds);
+            Map<Long, User> userMap = getUserMap(userIds, userMapper);
             for (DynamicVO dynamicVO : dynamicVOS) {
                 Long userId1 = dynamicVO.getDynamic().getUserId();
                 if (userMap.containsKey(userId1)) {
@@ -138,7 +139,7 @@ public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> impl
 
         if (!userIds.isEmpty()) {
             // 查询每条动态的用户信息
-            Map<Long, User> userMap = getUserMap(userIds);
+            Map<Long, User> userMap = getUserMap(userIds, userMapper);
 
             // 解决 n + 1 问题
             for (DynamicVO vo : dynamicVOS) {
@@ -287,22 +288,5 @@ public class DynamicServiceImpl extends ServiceImpl<DynamicMapper, Dynamic> impl
         queryWrapper.eq(Dynamic::getType, VIDEO_TYPE);
         dynamicVO.setDynamicNum(this.count(queryWrapper));
         return dynamicVO;
-    }
-
-    private Map<Long, User> getUserMap(List<Long> userIds) {
-        Map<Long, User> userMap = new HashMap<>(16);
-
-        if (!userIds.isEmpty()) {
-            // 解决 n + 1 问题
-            LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-            userLambdaQueryWrapper.in(User::getId, userIds);
-            List<User> userList = userMapper.selectList(userLambdaQueryWrapper);
-
-            for (User user : userList) {
-                userMap.put(user.getId(), user);
-            }
-        }
-
-        return userMap;
     }
 }

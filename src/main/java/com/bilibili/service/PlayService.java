@@ -5,6 +5,7 @@ import com.bilibili.dto.PlayDTO;
 import com.bilibili.pojo.Play;
 import com.bilibili.vo.PlayVO;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -44,4 +45,18 @@ public interface PlayService extends IService<Play> {
      * @return 昨天新增播放量
      */
     PlayVO getYesterdayData(Integer type);
+
+    /**
+     * 获取所有播放量
+     * @param type 动态类型
+     * @return 播放量
+     */
+    PlayVO getAllData(Integer type);
+
+    /**
+     * 获取近7天的播放量
+     * @param type 动态类型
+     * @return 近7天的播放量
+     */
+    LinkedHashMap<String, Long> getLastSevenDaysData(Integer type);
 }

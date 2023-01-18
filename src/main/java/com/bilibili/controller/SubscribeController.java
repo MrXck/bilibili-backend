@@ -5,6 +5,8 @@ import com.bilibili.service.SubscribeService;
 import com.bilibili.vo.SubscribeVO;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
+
 @RestController
 @RequestMapping("/subscribe")
 public class SubscribeController {
@@ -72,5 +74,10 @@ public class SubscribeController {
     @GetMapping("/getYesterdayData")
     public SubscribeVO getYesterdayData() {
         return subscribeService.getYesterdayData();
+    }
+
+    @GetMapping("/getLastSevenDaysData/{type}")
+    public LinkedHashMap<String, Long> getLastSevenDaysData(@PathVariable("type") Integer type) {
+        return subscribeService.getLastSevenDaysData(type);
     }
 }

@@ -6,6 +6,7 @@ import com.bilibili.service.StarService;
 import com.bilibili.vo.StarVO;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -51,5 +52,15 @@ public class StarController {
     @GetMapping("/getYesterdayData/{type}")
     public StarVO getYesterdayData(@PathVariable("type") Integer type) {
         return starService.getYesterdayData(type);
+    }
+
+    @GetMapping("/getAllData/{type}")
+    public StarVO getAllData(@PathVariable("type") Integer type) {
+        return starService.getAllData(type);
+    }
+
+    @GetMapping("/getLastSevenDaysData/{type}")
+    public LinkedHashMap<String, Long> getLastSevenDaysData(@PathVariable("type") Integer type) {
+        return starService.getLastSevenDaysData(type);
     }
 }
