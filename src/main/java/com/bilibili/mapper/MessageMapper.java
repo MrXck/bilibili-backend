@@ -8,6 +8,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * @author xck
+ */
 @Mapper
 public interface MessageMapper extends BaseMapper<Message> {
     @Select("SELECT id,from_id,to_id,content,time,type FROM message WHERE id < #{id} AND ((from_id = #{fromId} AND to_id = #{toId}) OR (from_id = #{toId} AND to_id = #{fromId})) ORDER BY id desc limit #{pageSize}")

@@ -103,7 +103,7 @@ public class PlayServiceImpl extends ServiceImpl<PlayMapper, Play> implements Pl
 
         play.setUpdateTime(LocalDateTime.now());
         play.setIsDelete(DELETE);
-        this.save(play);
+        this.updateById(play);
     }
 
     @Override
