@@ -15,5 +15,8 @@ import java.util.Map;
 public interface SubscribeMapper extends BaseMapper<Subscribe> {
 
     @Select("select date(create_time) dat, count(*) num from subscribe where create_time >= #{startTime} and create_time < #{endTime} and subscribe_id = #{subscribeId} GROUP BY dat ORDER BY dat desc;")
-    List<Map<String, Object>> getAllData(String startTime, String endTime, Long subscribeId);
+    List<Map<String, Object>> getLastSevenDaysFanData(String startTime, String endTime, Long subscribeId);
+
+    @Select("select date(create_time) dat, count(*) num from subscribe where create_time >= #{startTime} and create_time < #{endTime} and user_id = #{subscribeId} GROUP BY dat ORDER BY dat desc;")
+    List<Map<String, Object>> getLastSevenDaysSubscribeData(String startTime, String endTime, Long subscribeId);
 }

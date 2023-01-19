@@ -205,13 +205,29 @@ public class SubscribeServiceImpl extends ServiceImpl<SubscribeMapper, Subscribe
     }
 
     @Override
-    public LinkedHashMap<String, Long> getLastSevenDaysData(Integer type) {
+    public LinkedHashMap<String, Long> getLastSevenDaysFanData(Integer type) {
         String endTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, 1).toDateStr();
         String startTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, -6).toDateStr();
 
         LinkedHashMap<String, Long> map = getSevenDaysMap();
 
-        List<Map<String, Object>> allData = this.baseMapper.getAllData(startTime, endTime, UserThreadLocal.get());
+        List<Map<String, Object>> allData = this.baseMapper.getLastSevenDaysFanData(startTime, endTime, UserThreadLocal.get());
+
+        for (Map<String, Object> allDatum : allData) {
+            map.put(allDatum.get("dat").toString(), (Long) allDatum.get("num"));
+        }
+
+        return map;
+    }
+
+    @Override
+    public LinkedHashMap<String, Long> getLastSevenDaysSubscribeData(Integer type) {
+        String endTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, 1).toDateStr();
+        String startTime = DateUtil.yesterday().offset(DateField.DAY_OF_YEAR, -6).toDateStr();
+
+        LinkedHashMap<String, Long> map = getSevenDaysMap();
+
+        List<Map<String, Object>> allData = this.baseMapper.getLastSevenDaysSubscribeData(startTime, endTime, UserThreadLocal.get());
 
         for (Map<String, Object> allDatum : allData) {
             map.put(allDatum.get("dat").toString(), (Long) allDatum.get("num"));

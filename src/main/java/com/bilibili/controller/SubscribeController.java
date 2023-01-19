@@ -76,8 +76,13 @@ public class SubscribeController {
         return subscribeService.getYesterdayData();
     }
 
-    @GetMapping("/getLastSevenDaysData/{type}")
-    public LinkedHashMap<String, Long> getLastSevenDaysData(@PathVariable("type") Integer type) {
-        return subscribeService.getLastSevenDaysData(type);
+    @GetMapping("/getLastSevenDaysFanData/{type}")
+    public LinkedHashMap<String, Long> getLastSevenDaysFanData(@PathVariable("type") Integer type) {
+        return subscribeService.getLastSevenDaysFanData(type);
+    }
+
+    @GetMapping("/getLastSevenDaysSubscribeData/{type}")
+    public LinkedHashMap<String, Long> getLastSevenDaysSubscribeData(@PathVariable("type") Integer type) {
+        return subscribeService.getLastSevenDaysSubscribeData(type);
     }
 }

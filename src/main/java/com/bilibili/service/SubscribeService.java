@@ -87,5 +87,12 @@ public interface SubscribeService extends IService<Subscribe> {
      * @param type 动态类型
      * @return 近7日新增粉丝数
      */
-    LinkedHashMap<String, Long> getLastSevenDaysData(Integer type);
+    LinkedHashMap<String, Long> getLastSevenDaysFanData(Integer type);
+
+    /**
+     * 获取近7日新增关注数
+     * @param type 动态类型
+     * @return 近7日新增关注数
+     */
+    LinkedHashMap<String, Long> getLastSevenDaysSubscribeData(Integer type);
 }
