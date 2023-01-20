@@ -222,6 +222,15 @@ public class StarServiceImpl extends ServiceImpl<StarMapper, Star> implements St
         return map;
     }
 
+    @Override
+    public StarVO getAllStar(Long id) {
+        LambdaQueryWrapper<Star> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Star::getIsStaredUserId, id);
+        StarVO starVO = new StarVO();
+        starVO.setStarNum(this.count(queryWrapper));
+        return starVO;
+    }
+
     private Map<Long, DynamicComment> getDynamicCommentMap(List<Long> dynamicCommentIds) {
         Map<Long, DynamicComment> dynamicCommentMap = new HashMap<>(16);
 

@@ -1,5 +1,8 @@
 package com.bilibili.utils;
 
+/**
+ * @author xck
+ */
 public class Constant {
 
     public static final String PATH = System.getProperty("user.dir") + "/files/";

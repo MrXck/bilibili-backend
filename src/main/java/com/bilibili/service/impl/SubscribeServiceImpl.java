@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bilibili.dto.SubscribeDTO;
 import com.bilibili.exception.APIException;
-import com.bilibili.mapper.DynamicMapper;
 import com.bilibili.mapper.SubscribeMapper;
 import com.bilibili.mapper.UserMapper;
 import com.bilibili.pojo.Subscribe;
@@ -24,7 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.bilibili.utils.ServiceUtils.getDynamicIds;
 import static com.bilibili.utils.ServiceUtils.getSevenDaysMap;
 
 /**
@@ -35,11 +33,8 @@ public class SubscribeServiceImpl extends ServiceImpl<SubscribeMapper, Subscribe
 
     private final UserMapper userMapper;
 
-    private final DynamicMapper dynamicMapper;
-
-    public SubscribeServiceImpl(UserMapper userMapper, DynamicMapper dynamicMapper) {
+    public SubscribeServiceImpl(UserMapper userMapper) {
         this.userMapper = userMapper;
-        this.dynamicMapper = dynamicMapper;
     }
 
     @Override
@@ -109,7 +104,6 @@ public class SubscribeServiceImpl extends ServiceImpl<SubscribeMapper, Subscribe
         for (Subscribe record : records) {
             userIds.add(record.getUserId());
         }
-
 
         return new SubscribeVO(getUsers(userIds), subscribePage);
     }

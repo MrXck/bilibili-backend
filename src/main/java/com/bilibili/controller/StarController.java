@@ -63,4 +63,9 @@ public class StarController {
     public LinkedHashMap<String, Long> getLastSevenDaysData(@PathVariable("type") Integer type) {
         return starService.getLastSevenDaysData(type);
     }
+
+    @GetMapping("/getAllStar/{id}")
+    public StarVO getAllStar(@PathVariable("id") Long id) {
+        return starService.getAllStar(id);
+    }
 }

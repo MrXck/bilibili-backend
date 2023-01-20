@@ -2,6 +2,9 @@ package com.bilibili.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+/**
+ * @author xck
+ */
 public class MD5Utils {
 
     private static final String SALT = "xck666";

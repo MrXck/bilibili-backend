@@ -65,4 +65,11 @@ public interface StarService extends IService<Star> {
      * @return 近7日所有点赞数
      */
     LinkedHashMap<String, Long> getLastSevenDaysData(Integer type);
+
+    /**
+     * 通过用户id获取这个用户的获赞数
+     * @param id 用户id
+     * @return 获赞数
+     */
+    StarVO getAllStar(Long id);
 }
